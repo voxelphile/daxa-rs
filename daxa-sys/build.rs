@@ -10,6 +10,12 @@ fn main() {
     let dst = cmake::Config::new("daxa")
         .build_target("daxa")
         .profile(get_profile())
+        .configure_arg("--fresh")
+        .configure_arg("-DCMAKE_MODULE_PATH=~/.cmake/")
+        .configure_arg(
+            "-DCMAKE_TOOLCHAIN_FILE=/home/voxelphile/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        )
+        .configure_arg("-DCMAKE_MAKE_PROGRAM=/usr/bin/make")
         .configure_arg("-DBUILD_SHARED_LIBS=OFF")
         .configure_arg("-DDAXA_USE_VCPKG=ON")
         .configure_arg(format!(
@@ -42,7 +48,7 @@ fn main() {
         get_vcpkg_os_dir()
     );
     let bindings = bindgen::Builder::default()
-        .clang_arg("--target=x86_64-pc-windows-msvc")
+        .clang_arg("--target=x86_64-unknown-linux-gnu")
         .clang_arg("--language=c")
         .clang_arg("-Idaxa/include")
         .clang_arg(vcpkg_includes)

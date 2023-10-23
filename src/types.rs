@@ -1,14 +1,13 @@
 use bitflags::bitflags;
-use std::os;
+use std::{os, marker::PhantomData};
 
 #[repr(i32)]
 pub enum Result {
-    Unknown = daxa_sys::daxa_Result_DAXA_RESULT_UNKNOWN,
     Success = daxa_sys::daxa_Result_DAXA_RESULT_SUCCESS,
     MissingExtension = daxa_sys::daxa_Result_DAXA_RESULT_MISSING_EXTENSION,
 }
 
-#[repr(i32)]
+#[repr(u32)]
 pub enum ImageLayout {
     Undefined = daxa_sys::daxa_ImageLayout_DAXA_IMAGE_LAYOUT_UNDEFINED,
     General = daxa_sys::daxa_ImageLayout_DAXA_IMAGE_LAYOUT_GENERAL,
@@ -28,7 +27,7 @@ pub struct Vec2<T> {
 
 #[repr(C)]
 #[derive(Clone, Copy)]
-pub struct Vec2<T> {
+pub struct Vec3<T> {
     x: T,
     y: T,
     z: T,
@@ -36,7 +35,7 @@ pub struct Vec2<T> {
 
 #[repr(C)]
 #[derive(Clone, Copy)]
-pub struct Vec2<T> {
+pub struct Vec4<T> {
     x: T,
     y: T,
     z: T,
@@ -103,7 +102,7 @@ pub union AllocInfo {
 
 #[repr(C)]
 #[derive(Clone, Copy)]
-pub struct AllocateInfo {
+pub struct MemoryAllocateInfo {
     index: u64,
     info: AllocInfo,
 }
@@ -122,13 +121,13 @@ pub struct Option<T> {
     has_value: bool,
 }
 
-impl<T: Clone + Copy> Into<std::option::Option<&T>> for *const self::Option<T> {
-    fn into(self) -> std::option::Option<&T> {
+impl<'a, T: 'static> From<*const self::Option<T>> for std::option::Option<&'a T> {
+    fn from(value: *const self::Option<T>) -> Self {
         unsafe {
-            let this = self.as_ref().unwrap();
+            let this = value.as_ref().unwrap();
             if this.has_value {
                 drop(this);
-                Some(unsafe { self.cast::<T>().as_ref().unwrap() })
+                Some(unsafe { this.cast::<T>() })
             } else {
                 None
             }
@@ -136,13 +135,12 @@ impl<T: Clone + Copy> Into<std::option::Option<&T>> for *const self::Option<T> {
     }
 }
 
-impl<T: Clone + Copy> Into<std::option::Option<&mut T>> for *mut self::Option<T> {
-    fn into(self) -> std::option::Option<&T> {
+impl<'a, T: 'static> From<*mut self::Option<T>> for std::option::Option<&'a mut T> {
+    fn from(value: *mut self::Option<T>) -> Self {
         unsafe {
-            let this = self.as_ref().unwrap();
+            let this = value.as_mut().unwrap();
             if this.has_value {
-                drop(this);
-                Some(unsafe { self.cast::<T>().as_mut().unwrap() })
+                Some(unsafe { this.cast::<T>() })
             } else {
                 None
             }
@@ -193,8 +191,7 @@ impl<'a, const N: usize> From<&'a [u8; N]> for StringView<'a> {
     }
 }
 
-#[derive(Default)]
-#[repr(i32)]
+#[repr(u32)]
 pub enum Format {
     UNDEFINED = daxa_sys::VkFormat_VK_FORMAT_UNDEFINED,
     R4G4_UNORM_PACK8 = daxa_sys::VkFormat_VK_FORMAT_R4G4_UNORM_PACK8,
