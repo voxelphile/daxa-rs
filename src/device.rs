@@ -1,25 +1,29 @@
-daxa_sys bitflags::bitflags;
+use bitflags::bitflags;
 use std::mem;
 use std::sync;
 
-#[repr(i32)]
+use crate::Format;
+use crate::ImageMipArraySlice;
+use crate::StringView;
+
+#[repr(u32)]
 pub enum DeviceType {
-    Other = daxa_sys::daxa_Result_DAXA_DEVICE_TYPE_OTHER,
-    IntegratedGpu = daxa_sys::daxa_Result_DAXA_DEVICE_TYPE_INTEGRATED_GPU,
-    DiscreteGpu = daxa_sys::daxa_Result_DAXA_DEVICE_TYPE_DISCRETE_GPU,
-    VirtualGpu = daxa_sys::daxa_Result_DAXA_DEVICE_TYPE_VIRTUAL_GPU,
-    Cpu = daxa_sys::daxa_Result_DAXA_DEVICE_TYPE_CPU,
+    Other = daxa_sys::daxa_DeviceType_DAXA_DEVICE_TYPE_OTHER,
+    IntegratedGpu = daxa_sys::daxa_DeviceType_DAXA_DEVICE_TYPE_INTEGRATED_GPU,
+    DiscreteGpu = daxa_sys::daxa_DeviceType_DAXA_DEVICE_TYPE_DISCRETE_GPU,
+    VirtualGpu = daxa_sys::daxa_DeviceType_DAXA_DEVICE_TYPE_VIRTUAL_GPU,
+    Cpu = daxa_sys::daxa_DeviceType_DAXA_DEVICE_TYPE_CPU,
 }
 
 bitflags! {
     #[derive(Default)]
     pub struct DeviceFlags: u64 {
-        const BUFFER_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT = daxa_sys::DAXA_DEVICE_FLAG_BUFFER_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT;
-        const CONSERVATIVE_RASTERIZATION = daxa_sys::DAXA_DEVICE_FLAG_CONSERVATIVE_RASTERIZATION;
-        const MESH_SHADER_BIT = daxa_sys::DAXA_DEVICE_FLAG_MESH_SHADER_BIT;
-        const SHADER_ATOMIC64 = daxa_sys::DAXA_DEVICE_FLAG_SHADER_ATOMIC64;
-        const IMAGE_ATOMIC64 = daxa_sys::DAXA_DEVICE_FLAG_IMAGE_ATOMIC64;
-        const VK_MEMORY_MODEL = daxa_sys::DAXA_DEVICE_FLAG_VK_MEMORY_MODEL;
+        const BUFFER_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT = daxa_sys::daxa_DeviceFlagBits_DAXA_DEVICE_FLAG_BUFFER_DEVICE_ADDRESS_CAPTURE_REPLAY_BIT;
+        const CONSERVATIVE_RASTERIZATION = daxa_sys::daxa_DeviceFlagBits_DAXA_DEVICE_FLAG_CONSERVATIVE_RASTERIZATION;
+        const MESH_SHADER_BIT = daxa_sys::daxa_DeviceFlagBits_DAXA_DEVICE_FLAG_MESH_SHADER_BIT;
+        const SHADER_ATOMIC64 = daxa_sys::daxa_DeviceFlagBits_DAXA_DEVICE_FLAG_SHADER_ATOMIC64;
+        const IMAGE_ATOMIC64 = daxa_sys::daxa_DeviceFlagBits_DAXA_DEVICE_FLAG_IMAGE_ATOMIC64;
+        const VK_MEMORY_MODEL = daxa_sys::daxa_DeviceFlagBits_DAXA_DEVICE_FLAG_VK_MEMORY_MODEL;
     }
 }
 
@@ -40,7 +44,7 @@ pub struct VkPhysicalDeviceProperties<'a> {
     vendor_id: u32,
     device_id: u32,
     device_type: DeviceType,
-    device_name: crate::types::StringView<'a>,
+    device_name: StringView<'a>,
     pipeline_cache_uuid: [u8; VK_UUID_SIZE],
     limits: VkPhysicalDeviceLimits,
     sparse_properties: VkPhysicalDeviceSparseProperties,
@@ -52,7 +56,7 @@ pub struct DeviceInfo<'a> {
     max_allowed_images: u32,
     max_allowed_buffers: u32,
     max_allowed_samplers: u32,
-    name: crate::types::StringView<'a>,
+    name: StringView<'a>,
 }
 
 impl Default for DeviceInfo<'_> {
@@ -69,64 +73,64 @@ impl Default for DeviceInfo<'_> {
 }
 
 pub type BinarySemaphore = daxa_sys::daxa_BinarySemaphore;
-pub type CommandList = daxa_sys::daxa_CommandList;
+pub type CommandRecorder = daxa_sys::daxa_CommandRecorder;
 pub type Swapchain = daxa_sys::daxa_Swapchain;
 
 bitflags! {
     #[derive(Default)]
     pub struct PipelineStageFlags: i32 {
-        const TOP_OF_PIPE_BIT = daxa_sys::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-        const DRAW_INDIRECT_BIT = daxa_sys::VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT,
-        const VERTEX_INPUT_BIT = daxa_sys::VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,
-        const VERTEX_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_VERTEX_SHADER_BIT,
-        const TESSELLATION_CONTROL_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT,
-        const TESSELLATION_EVALUATION_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT,
-        const GEOMETRY_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT,
-        const FRAGMENT_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        const EARLY_FRAGMENT_TESTS_BIT = daxa_sys::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-        const LATE_FRAGMENT_TESTS_BIT = daxa_sys::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-        const COLOR_ATTACHMENT_OUTPUT_BIT = daxa_sys::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-        const COMPUTE_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-        const TRANSFER_BIT = daxa_sys::VK_PIPELINE_STAGE_TRANSFER_BIT,
-        const BOTTOM_OF_PIPE_BIT = daxa_sys::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-        const HOST_BIT = daxa_sys::VK_PIPELINE_STAGE_HOST_BIT,
-        const ALL_GRAPHICS_BIT = daxa_sys::VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT,
-        const ALL_COMMANDS_BIT = daxa_sys::VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-        const NONE = daxa_sys::VK_PIPELINE_STAGE_NONE,
-        const TRANSFORM_FEEDBACK_BIT_EXT = daxa_sys::VK_PIPELINE_STAGE_TRANSFORM_FEEDBACK_BIT_EXT,
-        const CONDITIONAL_RENDERING_BIT_EXT = daxa_sys::VK_PIPELINE_STAGE_CONDITIONAL_RENDERING_BIT_EXT,
-        const ACCELERATION_STRUCTURE_BUILD_BIT_KHR = daxa_sys::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
-        const RAY_TRACING_SHADER_BIT_KHR = daxa_sys::VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,
-        const FRAGMENT_DENSITY_PROCESS_BIT_EXT = daxa_sys::VK_PIPELINE_STAGE_FRAGMENT_DENSITY_PROCESS_BIT_EXT,
-        const FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR = daxa_sys::VK_PIPELINE_STAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR,
-        const COMMAND_PREPROCESS_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_COMMAND_PREPROCESS_BIT_NV,
-        const TASK_SHADER_BIT_EXT = daxa_sys::VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT,
-        const MESH_SHADER_BIT_EXT = daxa_sys::VK_PIPELINE_STAGE_MESH_SHADER_BIT_EXT,
-        const SHADING_RATE_IMAGE_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR,
-        const RAY_TRACING_SHADER_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_RAY_TRACING_SHADER_BIT_KHR,
-        const ACCELERATION_STRUCTURE_BUILD_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_ACCELERATION_STRUCTURE_BUILD_BIT_KHR,
-        const TASK_SHADER_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_TASK_SHADER_BIT_EXT,
-        const MESH_SHADER_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_MESH_SHADER_BIT_EXT,
-        const NONE_KHR = VK_PIPELINE_STAGE_NONE,
+        const TOP_OF_PIPE_BIT = daxa_sys::VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT;
+        const DRAW_INDIRECT_BIT = daxa_sys::VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+        const VERTEX_INPUT_BIT = daxa_sys::VK_PIPELINE_STAGE_2_VERTEX_INPUT_BIT;
+        const VERTEX_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT;
+        const TESSELLATION_CONTROL_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_2_TESSELLATION_CONTROL_SHADER_BIT;
+        const TESSELLATION_EVALUATION_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_2_TESSELLATION_EVALUATION_SHADER_BIT;
+        const GEOMETRY_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_2_GEOMETRY_SHADER_BIT;
+        const FRAGMENT_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
+        const EARLY_FRAGMENT_TESTS_BIT = daxa_sys::VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT;
+        const LATE_FRAGMENT_TESTS_BIT = daxa_sys::VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT;
+        const COLOR_ATTACHMENT_OUTPUT_BIT = daxa_sys::VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+        const COMPUTE_SHADER_BIT = daxa_sys::VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        const TRANSFER_BIT = daxa_sys::VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        const BOTTOM_OF_PIPE_BIT = daxa_sys::VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT;
+        const HOST_BIT = daxa_sys::VK_PIPELINE_STAGE_2_HOST_BIT;
+        const ALL_GRAPHICS_BIT = daxa_sys::VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT;
+        const ALL_COMMANDS_BIT = daxa_sys::VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+        const NONE = daxa_sys::VK_PIPELINE_STAGE_2_NONE;
+        const TRANSFORM_FEEDBACK_BIT_EXT = daxa_sys::VK_PIPELINE_STAGE_2_TRANSFORM_FEEDBACK_BIT_EXT;
+        const CONDITIONAL_RENDERING_BIT_EXT = daxa_sys::VK_PIPELINE_STAGE_2_CONDITIONAL_RENDERING_BIT_EXT;
+        const ACCELERATION_STRUCTURE_BUILD_BIT_KHR = daxa_sys::VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR;
+        const RAY_TRACING_SHADER_BIT_KHR = daxa_sys::VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+        const FRAGMENT_DENSITY_PROCESS_BIT_EXT = daxa_sys::VK_PIPELINE_STAGE_2_FRAGMENT_DENSITY_PROCESS_BIT_EXT;
+        const FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR = daxa_sys::VK_PIPELINE_STAGE_2_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR;
+        const COMMAND_PREPROCESS_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_2_COMMAND_PREPROCESS_BIT_NV;
+        const TASK_SHADER_BIT_EXT = daxa_sys::VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT;
+        const MESH_SHADER_BIT_EXT = daxa_sys::VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT;
+        const SHADING_RATE_IMAGE_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_2_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR;
+        const RAY_TRACING_SHADER_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_2_RAY_TRACING_SHADER_BIT_KHR;
+        const ACCELERATION_STRUCTURE_BUILD_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_2_ACCELERATION_STRUCTURE_BUILD_BIT_KHR;
+        const TASK_SHADER_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT;
+        const MESH_SHADER_BIT_NV = daxa_sys::VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT;
+        const NONE_KHR = VK_PIPELINE_STAGE_2_NONE;
     }
 }
 
 bitflags! {
     #[derive(Default)]
     pub struct ImageViewType: i32 {
-        const OneDim = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_1D,
-        const TwoDim = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_2D,
-        const ThreeDim = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_3D,
-        const Cube = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_CUBE,
-        const OneDimArray = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_1D_ARRAY,
-        const TwoDimArray = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_2D_ARRAY,
-        const CubeArray = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_CUBE_ARRAY,
+        const OneDim = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_1D;
+        const TwoDim = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_2D;
+        const ThreeDim = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_3D;
+        const Cube = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_CUBE;
+        const OneDimArray = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_1D_ARRAY;
+        const TwoDimArray = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_2D_ARRAY;
+        const CubeArray = daxa_sys::VkImageViewType_VK_IMAGE_VIEW_TYPE_CUBE_ARRAY;
     }
 }
 
 pub struct CommandSubmitInfo<'a> {
     wait_stages: PipelineStageFlags,
-    cmd_lists: &'a [CommandList],
+    cmd_recorders: &'a [CommandRecorder],
     wait_binary_semaphores: &'a [BinarySemaphore],
     signal_binary_semaphores: &'a [BinarySemaphore],
     wait_timeline_semaphores: &'a [BinarySemaphore],
@@ -138,17 +142,7 @@ pub struct PresentInfo<'a> {
     swapchain: Swapchain,
 }
 
-pub struct Device {
-    handle: sync::Arc<daxa_sys::daxa_Device>,
-}
-
-impl Drop for Device {
-    fn drop(&mut self) {
-        if self.handle.strong_count() == 1 {
-            unsafe { daxa_sys::daxa_destroy_device(self.handle.read()) }
-        }
-    }
-}
+pub struct Device(daxa_sys::daxa_Device);
 
 pub type BufferInfo = daxa_sys::daxa_BufferInfo;
 pub type ImageInfo = daxa_sys::daxa_ImageInfo;
@@ -167,7 +161,7 @@ pub struct ImageViewInfo<'a> {
     name: crate::types::StringView<'a>,
 }
 
-pub struct SamplerInfo {
+pub struct SamplerInfo<'a> {
     ty: ImageViewType,
     format: Format,
     image: ImageId,
@@ -175,103 +169,51 @@ pub struct SamplerInfo {
     name: crate::types::StringView<'a>,
 }
 
-struct BufferInternal {
+#[derive(Clone)]
+pub struct Buffer {
     device: Device,
     handle: BufferId,
 }
 
-#[derive(Clone)]
-pub struct Buffer {
-    internal: sync::Arc<BufferInternal>,
-}
-
 impl Buffer {
-    pub fn id() -> BufferId {
-        unsafe { self.internal.read().handle }
+    pub fn id(&self) -> BufferId {
+        unsafe { self.handle }
     }
 }
 
-impl Drop for BufferInternal {
-    fn drop(&mut self) {
-        unsafe {
-            let internal = self.internal.read();
-            daxa_sys::daxa_dvc_destroy_buffer(internal.device.handle, internal.handle);
-        }
-    }
-}
-
-struct ImageInternal {
+#[derive(Clone)]
+struct Image {
     device: Device,
     handle: ImageId,
 }
 
-#[derive(Clone)]
-pub struct Image {
-    internal: sync::Arc<ImageInternal>,
-}
-
 impl Image {
-    pub fn id() -> ImageId {
-        unsafe { self.internal.read().handle }
+    pub fn id(&self) -> ImageId {
+        self.handle
     }
 }
 
-impl Drop for ImageInternal {
-    fn drop(&mut self) {
-        unsafe {
-            let internal = self.internal.read();
-            daxa_sys::daxa_dvc_destroy_image(internal.device.handle, internal.handle);
-        }
-    }
-}
-
-struct ImageViewInternal {
+#[derive(Clone)]
+struct ImageView {
     device: Device,
     handle: ImageViewId,
 }
 
-#[derive(Clone)]
-pub struct ImageView {
-    internal: sync::Arc<ImageViewInternal>,
-}
-
 impl ImageView {
-    fn id() -> ImageViewId {
-        unsafe { self.internal.read().handle }
+    fn id(&self) -> ImageViewId {
+        self.handle
     }
-}
-
-impl Drop for ImageViewInternal {
-    fn drop(&mut self) {
-        unsafe {
-            let internal = self.internal.read();
-            daxa_sys::daxa_dvc_destroy_sampler(internal.device.handle, internal.handle);
-        }
-    }
-}
-
-struct SamplerInternal {
-    device: Device,
-    handle: SamplerId,
 }
 
 #[derive(Clone)]
 pub struct Sampler {
-    internal: sync::Arc<SamplerInternal>,
+    device: Device,
+    handle: SamplerId,
 }
 
 impl Sampler {
-    fn id() -> SamplerId {
-        unsafe { self.internal.read().handle }
-    }
-}
-
-impl Drop for SamplerInternal {
-    fn drop(&mut self) {
-        unsafe {
-            let internal = self.internal.read();
-            daxa_sys::daxa_dvc_destroy_image_view(internal.device.handle, internal.handle);
-        }
+    fn id(&self) -> SamplerId {
+        self.handle
     }
 }
 
@@ -296,7 +238,7 @@ impl Device {
 
     pub fn create_memory(
         &self,
-        info: &'a [MemoryBlockInfo],
+        info: &[MemoryBlockInfo],
     ) -> std::result::Result<MemoryBlock, crate::types::Result> {
         use crate::types::Result;
         use Result::*;
@@ -315,7 +257,7 @@ impl Device {
 
     pub fn create_buffer(
         &self,
-        info: &'a [BufferInfo],
+        info: &[BufferInfo],
     ) -> std::result::Result<Buffer, crate::types::Result> {
         use crate::types::Result;
         use Result::*;
@@ -326,10 +268,8 @@ impl Device {
                 daxa_sys::daxa_dvc_create_buffer(self.handle, info.as_ptr().cast::<daxa_sys::daxa_BufferInfo>(), &mut handle);
 
             let buffer = Buffer {
-                internal: Arc::new(BufferInternal {
                     handle,
                     device: self.clone(),
-                }),
             };
 
             match mem::transmute::<Result>(c_result) {
@@ -341,7 +281,7 @@ impl Device {
 
     pub fn create_image(
         &self,
-        info: &'a [ImageInfo],
+        info: &[ImageInfo],
     ) -> std::result::Result<Image, crate::types::Result> {
         use crate::types::Result;
         use Result::*;
@@ -351,10 +291,8 @@ impl Device {
             let c_result = daxa_sys::daxa_dvc_create_image(self.handle, info.as_ptr().cast::<daxa_sys::daxa_ImageInfo>(), &mut handle);
 
             let image = Buffer {
-                internal: Arc::new(ImageInternal {
                     handle,
                     device: self.clone(),
-                }),
             };
 
             match mem::transmute::<Result>(c_result) {
@@ -366,7 +304,7 @@ impl Device {
 
     pub fn create_image_view(
         &self,
-        info: &'a [ImageViewInfo],
+        info: &[ImageViewInfo],
     ) -> std::result::Result<ImageView, crate::types::Result> {
         use crate::types::Result;
         use Result::*;
@@ -377,10 +315,8 @@ impl Device {
                 daxa_sys::daxa_dvc_create_image_view(self.handle, info.as_ptr().cast::<daxa_sys::daxa_ImageViewInfo>(), &mut handle);
 
             let image_view = ImageView {
-                internal: Arc::new(ImageViewInternal {
                     handle,
                     device: self.clone(),
-                }),
             };
 
             match mem::transmute::<Result>(c_result) {
@@ -392,7 +328,7 @@ impl Device {
 
     pub fn create_sampler(
         &self,
-        info: &'a [SamplerInfo],
+        info: &[SamplerInfo],
     ) -> std::result::Result<Sampler, crate::types::Result> {
         use crate::types::Result;
         use Result::*;
@@ -403,10 +339,8 @@ impl Device {
                 daxa_sys::daxa_dvc_create_sampler(self.handle, info.as_ptr().cast::<daxa_sys::daxa_SamplerInfo>(), &mut handle);
 
             let sampler = Sampler {
-                internal: Arc::new(SamplerInternal {
                     handle,
                     device: self.clone(),
-                }),
             };
 
             match mem::transmute::<Result>(c_result) {
@@ -428,7 +362,7 @@ impl Device {
         }
     }
     
-    pub fn is_image_view_valid(&self, image_view: ImaegViewId) -> bool {
+    pub fn is_image_view_valid(&self, image_view: ImageViewId) -> bool {
         unsafe { 
             daxa_sys::daxa_dvc_is_image_view_valid(self.handle, image_view)
         }
@@ -448,7 +382,7 @@ impl Device {
 
             let mut raster_pipeline = std::mem::zeroed();
 
-            let c_result = daxa_sys::daxa_create_raster_pipeline(c_info, &mut raster_pipeline);
+            let c_result = daxa_sys::daxa_dvc_create_raster_pipeline(self.handle, c_info, &mut raster_pipeline);
 
             match mem::transmute::<Result>(c_result) {
                 Success => Ok(raster_pipeline),
@@ -466,7 +400,7 @@ impl Device {
 
             let mut compute_pipeline = std::mem::zeroed();
 
-            let c_result = daxa_sys::daxa_create_compute_pipeline(c_info, &mut compute_pipeline);
+            let c_result = daxa_sys::daxa_dvc_create_compute_pipeline(self.handle, c_info, &mut compute_pipeline);
 
             match mem::transmute::<Result>(c_result) {
                 Success => Ok(compute_pipeline),
@@ -484,7 +418,7 @@ impl Device {
 
             let mut swapchain = std::mem::zeroed();
 
-            let c_result = daxa_sys::daxa_create_swapchain(c_info, &mut swapchain);
+            let c_result = daxa_sys::daxa_dvc_create_swapchain(self.handle, c_info, &mut swapchain);
 
             match mem::transmute::<Result>(c_result) {
                 Success => Ok(swapchain),
@@ -493,19 +427,19 @@ impl Device {
         }
     }
 
-    //command list
-    pub fn create_command_list(&self, info: &crate::pipeline::CommandListInfo) -> std::result::Result<crate::pipeline::CommandList, crate::types::Result>  {
+    //command recorder
+    pub fn create_command_recorder(&self, info: &crate::pipeline::CommandRecorderInfo) -> std::result::Result<crate::pipeline::CommandRecorder, crate::types::Result>  {
         use crate::types::Result;
         use Result::Success;
         unsafe {
-            let c_info = info.as_ptr().cast::<daxa_sys::daxa_CommandListInfo>();
+            let c_info = info.as_ptr().cast::<daxa_sys::daxa_CommandRecorderInfo>();
 
-            let mut command_list = std::mem::zeroed();
+            let mut command_recorder = std::mem::zeroed();
 
-            let c_result = daxa_sys::daxa_create_command_list(c_info, &mut command_list);
+            let c_result = daxa_sys::daxa_dvc_create_command_recorder(self.handle, c_info, &mut command_recorder);
 
             match mem::transmute::<Result>(c_result) {
-                Success => Ok(command_list),
+                Success => Ok(command_recorder),
                 error => Err(error),
             }
         }
@@ -520,7 +454,7 @@ impl Device {
 
             let mut binary_semaphore = std::mem::zeroed();
 
-            let c_result = daxa_sys::daxa_create_binary_semaphore(c_info, &mut binary_semaphore);
+            let c_result = daxa_sys::daxa_dvc_create_binary_semaphore(self.handle, c_info, &mut binary_semaphore);
 
             match mem::transmute::<Result>(c_result) {
                 Success => Ok(binary_semaphore),
@@ -538,7 +472,7 @@ impl Device {
 
             let mut timeline_semaphore = std::mem::zeroed();
 
-            let c_result = daxa_sys::daxa_create_timeline_semaphore(c_info, &mut timeline_semaphore);
+            let c_result = daxa_sys::daxa_dvc_create_timeline_semaphore(self.handle, c_info, &mut timeline_semaphore);
 
             match mem::transmute::<Result>(c_result) {
                 Success => Ok(timeline_semaphore),
@@ -556,7 +490,7 @@ impl Device {
 
             let mut event = std::mem::zeroed();
 
-            let c_result = daxa_sys::daxa_create_event(c_info, &mut event);
+            let c_result = daxa_sys::daxa_dvc_create_event(self.handle, c_info, &mut event);
 
             match mem::transmute::<Result>(c_result) {
                 Success => Ok(event),
@@ -574,7 +508,7 @@ impl Device {
 
             let mut timeline_query_pool = std::mem::zeroed();
 
-            let c_result = daxa_sys::daxa_create_timeline_query_pool(c_info, &mut timeline_query_pool);
+            let c_result = daxa_sys::daxa_dvc_create_timeline_query_pool(self.handle, c_info, &mut timeline_query_pool);
 
             match mem::transmute::<Result>(c_result) {
                 Success => Ok(timeline_query_pool),
@@ -608,7 +542,7 @@ impl Device {
     //TODO submit
     //TODO present
 
-    pub fn wait_idle() -> crate::result::Result<(), crate::types::Result> {
+    pub fn wait_idle(&self) -> std::result::Result<(), crate::types::Result> {
         use crate::types::Result;
         use Result::Success;
         unsafe {
@@ -620,7 +554,7 @@ impl Device {
     }
 
     
-    pub fn collect_garbage() -> crate::result::Result<(), crate::types::Result> {
+    pub fn collect_garbage(&self) -> std::result::Result<(), crate::types::Result> {
         use crate::types::Result;
         use Result::Success;
         unsafe {
