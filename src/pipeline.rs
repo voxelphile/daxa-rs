@@ -1,6 +1,6 @@
 use bitflags::bitflags;
 
-use crate::{types, Format};
+use crate::{types, CompareOp, Format};
 
 pub type RasterPipeline = daxa_sys::daxa_RasterPipeline;
 
@@ -9,18 +9,6 @@ pub struct ShaderInfo<'a> {
     byte_code: *const u32,
     byte_code_size: usize,
     entry_point: types::StringView<'a>,
-}
-
-#[repr(u32)]
-pub enum CompareOp {
-    Never = daxa_sys::VkCompareOp_VK_COMPARE_OP_NEVER,
-    Less = daxa_sys::VkCompareOp_VK_COMPARE_OP_LESS,
-    Equal = daxa_sys::VkCompareOp_VK_COMPARE_OP_EQUAL,
-    LessOrEqual = daxa_sys::VkCompareOp_VK_COMPARE_OP_LESS_OR_EQUAL,
-    Greater = daxa_sys::VkCompareOp_VK_COMPARE_OP_GREATER,
-    NotEqual = daxa_sys::VkCompareOp_VK_COMPARE_OP_NOT_EQUAL,
-    GreaterOrEqual = daxa_sys::VkCompareOp_VK_COMPARE_OP_GREATER_OR_EQUAL,
-    Always = daxa_sys::VkCompareOp_VK_COMPARE_OP_ALWAYS,
 }
 
 #[repr(C)]
@@ -170,8 +158,10 @@ impl Default for BlendInfo {
 pub enum TesselationDomainOrigin {
     UpperLeft = daxa_sys::VkTessellationDomainOrigin_VK_TESSELLATION_DOMAIN_ORIGIN_UPPER_LEFT,
     LowerLeft = daxa_sys::VkTessellationDomainOrigin_VK_TESSELLATION_DOMAIN_ORIGIN_LOWER_LEFT,
-    UpperLeftKhr = daxa_sys::VkTessellationDomainOrigin_VK_TESSELLATION_DOMAIN_ORIGIN_UPPER_LEFT_KHR,
-    LowerLeftKhr = daxa_sys::VkTessellationDomainOrigin_VK_TESSELLATION_DOMAIN_ORIGIN_LOWER_LEFT_KHR,
+    UpperLeftKhr =
+        daxa_sys::VkTessellationDomainOrigin_VK_TESSELLATION_DOMAIN_ORIGIN_UPPER_LEFT_KHR,
+    LowerLeftKhr =
+        daxa_sys::VkTessellationDomainOrigin_VK_TESSELLATION_DOMAIN_ORIGIN_LOWER_LEFT_KHR,
 }
 
 #[repr(C)]

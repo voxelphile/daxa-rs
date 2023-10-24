@@ -11,11 +11,10 @@ fn main() {
         .build_target("daxa")
         .profile(get_profile())
         .configure_arg("--fresh")
-        .configure_arg("-DCMAKE_MODULE_PATH=~/.cmake/")
+        .configure_arg("-DCMAKE_MODULE_PATH=~C:/Program Files/CMake/")
         .configure_arg(
-            "-DCMAKE_TOOLCHAIN_FILE=/home/voxelphile/vcpkg/scripts/buildsystems/vcpkg.cmake",
+            "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake",
         )
-        .configure_arg("-DCMAKE_MAKE_PROGRAM=/usr/bin/make")
         .configure_arg("-DBUILD_SHARED_LIBS=OFF")
         .configure_arg("-DDAXA_USE_VCPKG=ON")
         .configure_arg(format!(
